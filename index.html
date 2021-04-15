@@ -11,6 +11,7 @@
     <img id="image1" width="200" src="https://edit.co.uk/uploads/2016/12/Image-1-Alternatives-to-stock-photography-Thinkstock.jpg" />
     <img id="image2" width="200" src="https://i2.wp.com/creapills.com/wp-content/uploads/2018/03/30-photos-absurdes-banques-dimages-23.jpg" />
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.6.1/gsap.min.js"></script>
     <script>
         console.log("Testing");
@@ -23,7 +24,11 @@
 
         function dragElement(elmnt) {
             var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-            elmnt.onmousedown = dragMouseDown;
+            if (Modernizr.touch === true) {
+                elmnt.ontouchstart = dragMouseDown;
+            } else {
+                elmnt.onmousedown = dragMouseDown;
+            }
 
             function dragMouseDown(e) {
                 e = e || window.event;
@@ -31,27 +36,45 @@
                 
                 pos3 = e.clientX;
                 pos4 = e.clientY;
-                document.onmouseup = closeDragElement;
-                
-                document.onmousemove = elementDrag;
+
+                if (Modernizr.touch === true) {
+                    document.ontouchend = closeDragElement;
+                    document.ontouchmove = elementDrag;
+                } else {
+                    document.onmouseup = closeDragElement;
+                    document.onmousemove = elementDrag;
+                }
             }
 
             function elementDrag(e) {
                 e = e || window.event;
                 e.preventDefault();
                 
-                pos1 = pos3 - e.clientX;
-                pos2 = pos4 - e.clientY;
-                pos3 = e.clientX;
-                pos4 = e.clientY;
+                if (Modernizr.touch === true) {
+                    var touch = event.touches[0];
+                    pos1 = pos3 - touch.pageX;
+                    pos2 = pos4 - touch.pageY;
+                    pos3 = touch.pageX;
+                    pos4 = touch.pageY;
+                } else {
+                    pos1 = pos3 - e.clientX;
+                    pos2 = pos4 - e.clientY;
+                    pos3 = e.clientX;
+                    pos4 = e.clientY;
+                }
                 
                 elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
                 elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
             }
 
             function closeDragElement() {
-                document.onmouseup = null;
-                document.onmousemove = null;
+                if (Modernizr.touch === true) {
+                    document.ontouchend = null;
+                    document.ontouchmove = null;
+                } else {
+                    document.onmouseup = null;
+                    document.onmousemove = null;
+                }
             }
         }
     </script>
